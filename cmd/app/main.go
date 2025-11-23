@@ -20,7 +20,7 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
-	db, err := database.New(ctx, cfg.DB)
+	db, err := database.New(ctx, cfg)
 	if err != nil {
 		log.Fatalf("failed to create DB instance: %v", err)
 	}

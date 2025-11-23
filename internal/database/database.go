@@ -14,7 +14,7 @@ type Database struct {
 	pool *pgxpool.Pool
 }
 
-func New(ctx context.Context, dbConfig config.Database) (*Database, error) {
+func New(ctx context.Context, dbConfig *config.Config) (*Database, error) {
 	poolConfig, err := pgxpool.ParseConfig(connectionString(dbConfig))
 	if err != nil {
 		return nil, fmt.Errorf("parse database connection config: %w", err)
@@ -47,7 +47,7 @@ func (db *Database) Close() {
 	}
 }
 
-func connectionString(dbConfig config.Database) string {
+func connectionString(dbConfig *config.Config) string {
 	return fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
 		dbConfig.User,

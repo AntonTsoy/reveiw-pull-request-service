@@ -37,7 +37,7 @@ services:
 
   app:
     build: .
-    container_name: sub_service
+    container_name: review_pull_request
     env_file: .env
     ports:
       - "8080:8080"
@@ -48,8 +48,12 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
-    healthcheck:
-      test: ["CMD-SHELL", "http://localhost:8080/healthcheck"]
+    #healthcheck:
+    #  test: ["CMD", "curl", "-f", "http://localhost:8080/healthcheck"]
+    #  interval: 10s
+    #  timeout: 3s
+    #  retries: 5
+    #  start_period: 15s
     restart: unless_stopped
 
 volumes:

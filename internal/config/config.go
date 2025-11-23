@@ -6,7 +6,7 @@ import (
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
-type Database struct {
+type Config struct {
 	Host     string `env:"DB_HOST" env-default:"db"`
 	Port     string `env:"DB_PORT" env-default:"5432"`
 	User     string `env:"DB_USER" env-default:"postgres"`
@@ -14,12 +14,6 @@ type Database struct {
 	Name     string `env:"DB_NAME" env-default:"postgres"`
 	SSL      string `env:"DB_SSL" env-default:"disable"`
 	Pool     int32  `env:"DB_POOL" env-default:"10"`
-}
-
-type Config struct {
-	Host string `env:"HOST" env-default:""`
-	Port string `env:"PORT" env-default:"8080"`
-	DB   Database
 }
 
 func Load() (*Config, error) {
