@@ -1,16 +1,60 @@
 package database
 
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/AntonTsoy/reveiw-pull-request-service/internal/config"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+)
+
 type Database struct {
+	pool *pgxpool.Pool
 }
 
-func New() {
+func New(ctx context.Context, dbConfig config.Database) (*Database, error) {
+	poolConfig, err := pgxpool.ParseConfig(connectionString(dbConfig))
+	if err != nil {
+		return nil, fmt.Errorf("parse database connection config: %w", err)
+	}
+
+	poolConfig.MaxConns = dbConfig.Pool
+
+	pool, err := pgxpool.NewWithConfig(ctx, poolConfig)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create connection pool: %w", err)
+	}
+
+	return &Database{pool: pool}, nil
 }
 
-func (d *Database) DB() {
+func (db *Database) Pool() *pgxpool.Pool {
+	return db.pool
 }
 
-func (d *Database) HealthCheck() {
+func (db *Database) HealthCheck(ctx context.Context) error {
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+
+	return db.pool.Ping(ctx)
 }
 
-func (d *Database) Close() {
+func (db *Database) Close() {
+	if db.pool != nil {
+		db.pool.Close()
+	}
+}
+
+func connectionString(dbConfig config.Database) string {
+	return fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		dbConfig.User,
+		dbConfig.Password,
+		dbConfig.Host,
+		dbConfig.Port,
+		dbConfig.Name,
+		dbConfig.SSL,
+	)
 }

@@ -1,10 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/AntonTsoy/reveiw-pull-request-service/internal/config"
+	"github.com/AntonTsoy/reveiw-pull-request-service/internal/database"
 )
 
 func main() {
@@ -13,9 +18,20 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%+v", cfg)
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer cancel()
 
-	// TODO: squirrel + pgx database
+	db, err := database.New(ctx, cfg.DB)
+	if err != nil {
+		log.Fatalf("failed to create DB instance: %v", err)
+	}
+	defer db.Close()
+
+	if err = db.HealthCheck(ctx); err != nil {
+		log.Fatalf("failed to open connection with database: %v", err)
+	}
+
+	fmt.Printf("DB connection opened!")
 
 	// TODO: repository
 
@@ -23,7 +39,8 @@ func main() {
 
 	// TODO: Fiber http handlers
 
-	// TODO: start service
+	// TODO: start server
 
-	// TODO: graceful shutdown
+	<-ctx.Done()
+	log.Println("Shutting down...")
 }

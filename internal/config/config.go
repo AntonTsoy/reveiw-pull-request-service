@@ -13,7 +13,7 @@ type Database struct {
 	Password string `env:"DB_PASSWORD" env-required:"true"`
 	Name     string `env:"DB_NAME" env-default:"postgres"`
 	SSL      string `env:"DB_SSL" env-default:"disable"`
-	Pool     int    `env:"DB_POOL" env-default:"10"`
+	Pool     int32  `env:"DB_POOL" env-default:"10"`
 }
 
 type Config struct {
