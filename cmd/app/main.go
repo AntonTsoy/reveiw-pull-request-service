@@ -7,8 +7,12 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/AntonTsoy/reveiw-pull-request-service/internal/config"
-	"github.com/AntonTsoy/reveiw-pull-request-service/internal/database"
+	"github.com/AntonTsoy/review-pull-request-service/internal/config"
+	"github.com/AntonTsoy/review-pull-request-service/internal/database"
+	"github.com/AntonTsoy/review-pull-request-service/internal/transport/http/handlers"
+	"github.com/AntonTsoy/review-pull-request-service/internal/transport/http/server"
+	"github.com/AntonTsoy/review-pull-request-service/internal/repository"
+	"github.com/AntonTsoy/review-pull-request-service/internal/service"
 )
 
 func main() {
@@ -32,13 +36,16 @@ func main() {
 
 	log.Println("DB connection opened!")
 
-	// TODO: repository
+	repository := repository.NewRepository()
 
-	// TODO: service
+	service := service.NewService(db, repository)
 
-	// TODO: Fiber http handlers
+	handlers := handlers.NewHandlers(service)
 
-	// TODO: start server
+	server := server.New(handlers)
+	_ = server
+
+	// TODO: запуск сервера в отдельной горутине
 
 	<-ctx.Done()
 	log.Println("Shutting down...")

@@ -15,7 +15,7 @@ type TeamRepository struct {
 	builder squirrel.StatementBuilderType
 }
 
-func NewTeamRepository() *TeamRepository {
+func newTeamRepository() *TeamRepository {
 	return &TeamRepository{
 		builder: squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
 	}
@@ -49,7 +49,7 @@ func (r *TeamRepository) GetByName(ctx context.Context, db DBTX, name string) (i
 		Where(squirrel.Eq{"name": name}).
 		Limit(1).
 		ToSql()
-	
+
 	if err != nil {
 		return 0, fmt.Errorf("build query: %w", err)
 	}

@@ -17,7 +17,7 @@ type UserRepository struct {
 	builder squirrel.StatementBuilderType
 }
 
-func NewUserRepository() *UserRepository {
+func newUserRepository() *UserRepository {
 	return &UserRepository{
 		builder: squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar),
 	}
@@ -39,6 +39,30 @@ func (r *UserRepository) Create(ctx context.Context, db DBTX, teamID int, user *
 	}
 
 	return nil
+}
+
+func (r *UserRepository) Exists(ctx context.Context, db DBTX, id string) (bool, error) {
+	sql, args, err := r.builder.
+		Select("1").
+		From("users").
+		Where(squirrel.Eq{"id": id}).
+		Limit(1).
+		ToSql()
+
+	if err != nil {
+		return false, fmt.Errorf("build query: %w", err)
+	}
+
+    var exists bool
+    err = db.QueryRow(ctx, sql, args...).Scan(&exists)
+    if err != nil {
+        if errors.Is(err, pgx.ErrNoRows) {
+            return false, nil
+        }
+        return false, fmt.Errorf("query row: %w", err)
+    }
+
+    return true, nil
 }
 
 func (r *UserRepository) GetByTeamID(ctx context.Context, db DBTX, teamID int) ([]api.TeamMember, error) {
@@ -75,12 +99,13 @@ func (r *UserRepository) GetByTeamID(ctx context.Context, db DBTX, teamID int) (
 	return teamMembers, nil
 }
 
-func (r *UserRepository) Update(ctx context.Context, db DBTX, id string, name string, teamID int) error {
+func (r *UserRepository) Update(ctx context.Context, db DBTX, teamID int, user *api.TeamMember) error {
 	sql, args, err := r.builder.
 		Update("users").
-		Set("name", name).
+		Set("name", user.Username).
 		Set("team_id", teamID).
-		Where(squirrel.Eq{"id": id}).
+		Set("is_active", user.IsActive).
+		Where(squirrel.Eq{"id": user.UserId}).
 		ToSql()
 
 	if err != nil {

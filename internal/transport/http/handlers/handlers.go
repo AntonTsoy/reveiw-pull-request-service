@@ -1,0 +1,19 @@
+package handlers
+
+import (
+	"github.com/AntonTsoy/review-pull-request-service/internal/api"
+	"github.com/AntonTsoy/review-pull-request-service/internal/service"
+)
+
+type Handlers struct {
+	api.ServerInterface
+
+	*TeamHanler
+
+}
+
+func NewHandlers(service *service.Service) *Handlers {
+	return &Handlers{
+		TeamHanler: newTeamHandler(service.TeamService),
+	}
+}
