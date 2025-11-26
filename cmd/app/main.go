@@ -45,6 +45,10 @@ func main() {
 	handlers := handlers.NewHandlers(service)
 
 	server := server.New(handlers)
+
+	server.SetSwagger()
+	log.Println("Try to use swagger on http://127.0.0.1:8080/docs")
+
 	go func() {
 		if err := server.Start(":8080"); err != nil {
 			log.Printf("server error: %v", err)
